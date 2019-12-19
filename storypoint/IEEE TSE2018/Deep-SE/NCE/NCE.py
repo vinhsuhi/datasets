@@ -1,6 +1,6 @@
 import numpy
 from keras import initializers as initializations
-from keras.layers import Activation as activations
+from tensorflow.keras import * 
 import theano
 from theano import config
 import theano.tensor as tensor
@@ -42,8 +42,9 @@ class NCEContext(Layer):
         super(NCEContext, self).__init__(**kwargs)
 
     def build(self, input_shape): #input shape: nsamples * n_context * dim
-        self.C = self.init((self.context_dim, self.input_dim),
-                           name='{}_C'.format(self.name))
+        #self.C = self.init((self.context_dim, self.input_dim),
+        #                   name='{}_C'.format(self.name))
+        self.C = self.init((self.context_dim, self.input_dim))
         self.trainable_weights = [self.C]
 
     def get_output_shape_for(self, input_shape):
@@ -82,7 +83,9 @@ class NCE(Layer):
         self.input_dim = input_dim
         self.vocab_size = vocab_size
         self.n_noise = n_noise
+        
         self.Pn = theano.shared(numpy.array(Pn).astype(config.floatX))
+        self.Pn = numpy.array(Pn)
         self.rng = RS.RandomStreams(seed=SEED)
 
         self.W_regularizer = regularizers.get(W_regularizer)
@@ -101,12 +104,14 @@ class NCE(Layer):
         super(NCE, self).__init__(**kwargs)
 
     def build(self, input_shape):
-        self.W = self.init((self.vocab_size, self.input_dim),
-                           name='{}_W'.format(self.name))
+        #self.W = self.init((self.vocab_size, self.input_dim),
+        #                   name='{}_W'.format(self.name))
+        self.W = self.init((self.vocab_size, self.input_dim))
 
         if self.bias:
-            self.b = self.init((self.vocab_size,),
-                               name='{}_b'.format(self.name))
+            #self.b = self.init((self.vocab_size,),
+            #                   name='{}_b'.format(self.name))
+            self.b = self.init((self.vocab_size, ))
             self.trainable_weights = [self.W, self.b]
         else:
             self.trainable_weights = [self.W]
@@ -146,6 +151,10 @@ class NCE(Layer):
         n_next = self.n_noise + 1
 
         #generate n_noise samples from noise distribution Pn.
+        print("y"*100)
+        print(n_samples, self.n_noise)
+        print(self.Pn.shape[0])
+        print(self.Pn)
         noise_w = self.rng.choice(size=(n_samples, self.n_noise), a=self.Pn.shape[0], p=self.Pn)
         next_w = tensor.concatenate([next_w, noise_w], axis=-1)
 
@@ -199,6 +208,10 @@ class NCE_seq(NCE):
         n_next = self.n_noise + 1
 
         #generate n_noise samples from noise distribution Pn.
+        print("x"*100)
+        print(n_samples, n_steps, self.n_noise)
+        print(self.Pn.shape[0])
+        print(self.Pn)
         noise_w = self.rng.choice(size=(n_samples, n_steps, self.n_noise), a=self.Pn.shape[0], p=self.Pn)
         next_w = next_w.flatten().reshape([n_samples, n_steps, 1])
         next_w = tensor.concatenate([next_w, noise_w], axis=-1) # shape: n_samples * n_steps * n_next
