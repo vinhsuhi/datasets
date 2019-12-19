@@ -5,7 +5,8 @@
 # 60%, 20%, 20%, for training, validation and test set
 
 import sys
-from sklearn.cross_validation import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
+#from sklearn.cross_validation import StratifiedKFold
 import pandas
 import numpy
 
@@ -20,16 +21,15 @@ testSize = 20;
 
 if trainingSize + validationSize + testSize == 100:
     numData = len(labels);
-    numTrain = (trainingSize * numData) / 100
-    numValidation = (validationSize * numData) / 100
-    numTest = (testSize * numData) / 100
+    numTrain = int((trainingSize * numData) / 100)
+    numValidation = int((validationSize * numData) / 100)
+    numTest = int((testSize * numData) / 100)
 
-    print "Total data: %s" % numData
-    print "Training size: %s, validation size: %s, testing size: %s" % (numTrain, numValidation, numTest)
-    print "Total: %s" % (numTrain + numValidation + numTest)
+    print("Total data: %s" % numData)
+    print("Training size: %s, validation size: %s, testing size: %s" % (numTrain, numValidation, numTest))
+    print("Total: %s" % (numTrain + numValidation + numTest))
 
     divided_set = numpy.zeros((len(labels), 3)).astype('int64')
-
     divided_set[0:numTrain - 1, 0] = 1
     divided_set[numTrain - 1:numTrain + numValidation - 1, 1] = 1
     divided_set[numTrain + numValidation - 1:numData, 2] = 1
@@ -41,4 +41,4 @@ if trainingSize + validationSize + testSize == 100:
 
     f.close()
 else:
-    print "check size"
+    print("check size")

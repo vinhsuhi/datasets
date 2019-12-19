@@ -15,5 +15,5 @@ if mode == 'pretrain':
         for dataPre in dataPres:
             command = flag + 'python lstm2vec_pretrain.py -data ' + dataPre + \
                       ' -saving lstm2v_' + dataPre + '_dim' + dim + ' -vocab ' + vocab + ' -dim ' + dim
-            print command
+            print(command)
             os.system(command)

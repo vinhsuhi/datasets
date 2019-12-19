@@ -1,7 +1,7 @@
 
 import gzip
 import sys
-import cPickle
+import _pickle as cPickle
 import load_raw_text
 import preprocess
 
@@ -24,13 +24,13 @@ def main():
         if ls[1] == '1': valid_ids.append(count)
         if ls[2] == '1': test_ids.append(count)
 
-    print 'ntrain, nvalid, ntest: ', len(train_ids), len(valid_ids), len(test_ids)
+    print('ntrain, nvalid, ntest: ', len(train_ids), len(valid_ids), len(test_ids))
 
     train_title, train_description, train_labels = title[train_ids], description[train_ids], labels[train_ids]
     valid_title, valid_description, valid_labels = title[valid_ids], description[valid_ids], labels[valid_ids]
     test_title, test_description, test_labels = title[test_ids], description[test_ids], labels[test_ids]
 
-    f_dict = gzip.open(sys.argv[2] + '.dict.pkl.gz', 'rb')
+    f_dict = gzip.open(sys.argv[2] + '.dict.pkl.gz', 'rb') #, encoding='utf-8')
     dictionary = cPickle.load(f_dict)
     train_t, train_d = preprocess.grab_data(train_title, train_description, dictionary)
     valid_t, valid_d = preprocess.grab_data(valid_title, valid_description, dictionary)

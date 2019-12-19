@@ -1,4 +1,6 @@
 import numpy
+from keras import initializers as initializations
+from keras.layers import Activation as activations
 import theano
 from theano import config
 import theano.tensor as tensor

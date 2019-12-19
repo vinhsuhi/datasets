@@ -3,11 +3,13 @@
 #
 
 chosen_frequency = 30
-import cPickle as pkl
+#import cPickle as pkl
 import numpy
 import sys
-from sklearn.cross_validation import StratifiedKFold
+import _pickle as pkl
+#from sklearn.cross_validation import StratifiedKFold
 import gzip
+from sklearn.model_selection import StratifiedKFold
 
 import load_raw_text
 
@@ -18,19 +20,19 @@ tokenizer_cmd = ['/usr/bin/perl', 'tokenizer.perl', '-l', 'en', '-q', '-']
 
 def tokenize(sentences):
 
-    print 'Tokenizing..',
+    print('Tokenizing..',)
     text = "\n".join(sentences)
     tokenizer = Popen(tokenizer_cmd, stdin=PIPE, stdout=PIPE)
+    
     tok_text, _ = tokenizer.communicate(text)
-    toks = tok_text.split('\n')[:-1]
-    print 'Done'
-
+    toks = tok_text.decode().split('\n')[:-1]
+    print('Done')
     return toks
 
 def build_dict(sentences):
     sentences = tokenize(sentences)
 
-    print 'Building dictionary..'
+    print('Building dictionary..')
     wordcount = dict()
     for ss in sentences:
         words = ss.strip().lower().split()
@@ -40,13 +42,13 @@ def build_dict(sentences):
             else:
                 wordcount[w] += 1
 
-    counts = wordcount.values()
-    keys = wordcount.keys()
+    counts = list(wordcount.values())
+    keys = list(wordcount.keys())
 
     sorted_idx = numpy.argsort(counts)[::-1]
     counts = numpy.array(counts)
 
-    print 'number of words in dictionary:', len(keys)
+    print('number of words in dictionary:', len(keys))
 
     worddict = dict()
 
@@ -57,7 +59,7 @@ def build_dict(sentences):
     for i, c in enumerate(sorted_idx):
         if counts[c] >= chosen_frequency: pos = i
 
-    print numpy.sum(counts), ' total words, ', pos, 'words with frequency >=', chosen_frequency
+    print(numpy.sum(counts), ' total words, ', pos, 'words with frequency >=', chosen_frequency)
 
     return worddict
 
@@ -71,7 +73,7 @@ def grab_data(title, description, dictionary):
             words = ss.strip().lower().split()
             seqs[i][idx] = [dictionary[w] if w in dictionary else 0 for w in words]
             if len(seqs[i][idx]) == 0:
-                print 'len 0: ', i, idx
+                print('len 0: ', i, idx)
 
     return seqs[0], seqs[1]
 
@@ -79,8 +81,8 @@ def main():
     # load pretrain text:
     pretrain_path = sys.argv[1] + '_pretrain.csv'
     pre_title, pre_descr = load_raw_text.load_pretrain(pretrain_path)
-    print 'number of datapoints:', len(pre_title)
-    print "after building dict..."
+    print('number of datapoints:', len(pre_title))
+    print("after building dict...")
 
     n_train = len(pre_title) * 2 // 3
     ids = numpy.arange(len(pre_title))

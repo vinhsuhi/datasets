@@ -1,4 +1,4 @@
-import cPickle
+import _pickle as cPickle
 import numpy
 import theano
 import theano.tensor as tensor
