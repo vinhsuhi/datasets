@@ -200,7 +200,7 @@ class NCE_seq(NCE):
     def get_output_shape_for(self, input_shape):
         return (None, self.input_len, self.n_noise + 1)
 
-    def call(self, inputs, mask=None):
+    def call(self, inputs, mask=None, n_samples):
         context = inputs[0] #shape: n_samples * n_steps * dim
         next_w = inputs[1] #shape: n_samles * n_steps
 
@@ -208,10 +208,6 @@ class NCE_seq(NCE):
         n_next = self.n_noise + 1
 
         #generate n_noise samples from noise distribution Pn.
-        print("x"*100)
-        print(n_samples, n_steps, self.n_noise)
-        print(self.Pn.shape[0])
-        print(self.Pn)
         noise_w = self.rng.choice(size=(n_samples, n_steps, self.n_noise), a=self.Pn.shape[0], p=self.Pn)
         next_w = next_w.flatten().reshape([n_samples, n_steps, 1])
         next_w = tensor.concatenate([next_w, noise_w], axis=-1) # shape: n_samples * n_steps * n_next

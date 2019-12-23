@@ -55,7 +55,7 @@ else:
     loss = binary_crossentropy
 
 ###################################### BUILD MODEL##################################################
-print 'Building model...'
+print('Building model...')
 
 if 'fixed' in pretrain:
     train_t, train_d, valid_t, valid_d, test_t, test_d = prepare_data.to_features([train_t, train_d,

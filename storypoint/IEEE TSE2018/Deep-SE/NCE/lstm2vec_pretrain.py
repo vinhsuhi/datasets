@@ -52,11 +52,11 @@ next_inp = Input(shape=(inp_len,), dtype='int64', name='next_inp')
 
 # Embed the context words to distributed vectors -> feed to GRU layer to compute the context vector
 emb_vec = Embedding(output_dim=emb_dim, input_dim=vocab_size, input_length=inp_len,
-                    #dropout=0.2,
                     mask_zero=True)(main_inp)
 
 GRU_context = LSTM(input_dim=emb_dim, output_dim=emb_dim,
                    return_sequences=True)(emb_vec)
+
 #GRU_context = Dropout(0.5)(GRU_context)
 
 # feed output of GRU layer to NCE layer

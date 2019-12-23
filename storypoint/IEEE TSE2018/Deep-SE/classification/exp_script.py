@@ -7,7 +7,7 @@ mode = 'experiment'  # 'experiment'
 
 model = 'seq'
 dims = ['10', '50', '100', '200']  # , '15', '20']
-# dims = ['200']  # , '15', '20']
+dims = ['200']  # , '15', '20']
 # repository = 'apache'
 # projects = ['usergrid'] #
 
@@ -32,6 +32,8 @@ datasetDict = {
     'talendesb': 'talendforge'
 }
 
+datasetDict = {'mesos': 'apache'}
+
 nnet_models = ['highway']  # ['dense', 'highway']
 seq_models = ['lstm']  # ['gru', 'lstm', 'rnn']
 regs = ['inphid']  # ['x', 'inp', 'hid', 'inphid'] # 'x' means no dropout
@@ -46,6 +48,7 @@ maxlen = '100'
 # tunning parameter
 # hdls = [2, 3, 5, 10, 20, 50, 100, 200]
 hdls = [2, 3, 5, 10, 20, 30, 40, 50, 60, 80, 100, 200]
+hdls = [2]
 # hdls = [80,100,200]
 # Running script:
 
@@ -64,10 +67,10 @@ if mode == 'experiment':
                                     cmd += ' -saving ' + project + '_' + seq + '_' + nnet + '_dim' + dim + \
                                            '_reg' + reg + '_pre' + pretrain + '_pool' + pool
                                     # file name e.g. appceleratorstudio_lstm_highway_dim100_reginphid_prefixed_lm_poolmean.txt
-                                    print cmd
+                                    print(cmd)
                                     os.system(cmd)
 elif mode == 'tunning':
-    print 'tunning using MAE'
+    print('tunning using MAE')
     if model == 'seq':
         for project, repository in datasetDict.items():
             for nnet in nnet_models:
@@ -82,7 +85,7 @@ elif mode == 'tunning':
                                               ' -reg ' + reg + ' -pretrain ' + pretrain + ' -pool ' + pool + ' -hiddenLayer ' + str(
                                             hdl)
                                         cmd += ' -saving tune_' + project + '_dim_' + dim
-                                        print cmd
+                                        print(cmd)
                                         os.system(cmd)
 #
 # if model == 'BoW':

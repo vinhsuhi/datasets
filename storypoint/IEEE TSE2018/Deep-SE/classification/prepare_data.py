@@ -1,4 +1,4 @@
-import cPickle
+import _pickle as cPickle
 import numpy
 import gzip
 from keras.models import model_from_json

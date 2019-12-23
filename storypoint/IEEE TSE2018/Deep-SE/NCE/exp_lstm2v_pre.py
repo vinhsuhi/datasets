@@ -2,9 +2,10 @@ import os
 
 mode = 'pretrain'
 
-dims = ['10', '50', '100', '200']
+dims = ['10'] #, '50', '100', '200']
 dataPres = ['moodle', 'apache', 'appcelerator', 'duraspace', 'jira', 'lsstcorp', 'mulesoft', 'spring',
             'talendforge']  # pretrained data
+dataPres = ['moodle']
 
 vocab = '5000'
 

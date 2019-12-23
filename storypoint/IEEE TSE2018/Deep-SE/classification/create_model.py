@@ -220,7 +220,7 @@ class PoolingSeq(Layer):
 def create_highway(below_layer, out_dim, hdl=10):
     shared_highway = Highway(activation='relu', init='glorot_normal', transform_bias=-1)
     hidd = below_layer
-    print 'Number of hiddenLayer' + str(hdl)
+    print('Number of hiddenLayer' + str(hdl))
     for i in range(
             hdl):  # it is the number of hidden layers in the highway net, you can change the range(10) to any number you like,as this is a hyper-parameter we need to specify
         hidd = shared_highway(hidd)
