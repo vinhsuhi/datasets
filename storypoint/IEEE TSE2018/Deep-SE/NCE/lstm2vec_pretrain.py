@@ -13,6 +13,7 @@ import torch
 import noise_dist
 import torch.nn as nn
 from torch.nn import functional as F
+from tqdm import tqdm
 # from NCE import *
 
 
@@ -32,6 +33,13 @@ def init_weight(modules, activation):
                 m.bias.data = init.constant_(m.bias.data, 0.0)
 
 
+def NCE_seq_loss(y_true, y_pred):
+    bceloss = nn.BCELoss()
+    loss = bceloss(y_pred, y_true[:, :, 1:])
+    import pdb
+    pdb.set_trace()
+
+
 class UnsupEmb(nn.Module):
     def __init__(self, emb_dim, vocab_size, inp_len, n_noise, Pn, cuda=True):
         super(UnsupEmb, self).__init__()
@@ -46,10 +54,23 @@ class UnsupEmb(nn.Module):
         self.nce = NCE_seq(input_dim=emb_dim, input_len=inp_len, vocab_size=vocab_size, n_noise=n_noise, Pn=Pn, cuda=cuda)
         self.nce_test = NCETest_seq(input_dim=emb_dim, input_len=inp_len, vocab_size=vocab_size, cuda=cuda)
 
-    def forward():
+    def forward(train_x_batch, train_y_batch, train_batch_label):
+        train_x_batch = torch.LongTensor(train_x_batch)
+        train_y_batch = torch.LongTensor(train_y_batch)
+        train_batch_label = torch.LongTensor(train_batch_label)
+        if self.is_cuda:
+            train_x_batch = train_x_batch.cuda()
+            train_y_batch = train_y_batch.cuda()
+            train_batch_label = train_batch_label.cuda()
+
+        train_x_emb = self.embedding(train_x_batch)
+        GRU_context = self.lstm(trainn_x_emb)
+        nce_out = self.nce(GRU_context, train_y_batch)
+        
+
         pass
 
-    def test_forward():
+    def test_forward(test_x_batch, test_y_batch, test_batch_label):
         pass
 
 
@@ -183,6 +204,8 @@ class NCETest_seq(NCETest):
 if __name__ == "__main__":
     arg = load_data.arg_passing(sys.argv)
     CUDA=False
+    NB_EPOCHS=20
+    BATCH_SIZE=50
     dataset = '../data/' + arg['-data'] + '_pretrain.pkl.gz'
     saving = arg['-saving']
     emb_dim = arg['-dim']
@@ -224,7 +247,23 @@ if __name__ == "__main__":
     if CUDA:
         model = model.cuda()
 
+    optimizer = torch.optim.Adam(model.params, lr=0.02)
+
+    print("Fucking!!")
+
+    train_x_batch = train_x[:BATCH_SIZE]
+    train_y_batch = train_y[:BATCH_SIZE]
+    train_batch_label = labels[:BATCH_SIZE]
+
+    lol = model(train_x_batch, train_y_batch, train_batch_label)
+    # for epoch in tqdm(range(NB_EPOCHS)):
+        # optimizer.zero_grad()
+
+        
+
     print("DONE!")
+
+
     
     
 
