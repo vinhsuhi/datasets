@@ -1,7 +1,7 @@
 import _pickle as cPickle
 import numpy
-import theano
-import theano.tensor as tensor
+# import theano
+# import theano.tensor as tensor
 import gzip
 import scipy.io as sio
 
