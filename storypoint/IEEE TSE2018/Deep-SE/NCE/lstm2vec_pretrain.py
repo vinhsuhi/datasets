@@ -156,7 +156,7 @@ class NCE_seq(NCE):
         noise_score = torch.log(self.n_noise * noiseP)
 
         out = s_theta - noise_score
-        return F.sigmoid(out)
+        return torch.sigmoid(out)
     
 
 class NCETest(NCE):
@@ -257,7 +257,6 @@ if __name__ == "__main__":
 
     optimizer = torch.optim.Adam(model.parameters(), lr=0.02)
 
-    print("Fucking!!")
 
     # NUMPY
     train_x_batch = train_x[:BATCH_SIZE]
