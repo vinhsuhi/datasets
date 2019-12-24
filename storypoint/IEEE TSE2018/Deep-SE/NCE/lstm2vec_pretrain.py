@@ -129,7 +129,7 @@ class NCE_seq(NCE):
         self.input_len = input_len
         super(NCE_seq, self).__init__(**kwargs)
 
-    def forward(GRU_context, next_inp):
+    def forward(self, GRU_context, next_inp):
         context = GRU_context
         next_w = next_inp
 
