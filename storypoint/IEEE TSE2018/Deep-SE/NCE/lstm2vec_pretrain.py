@@ -15,6 +15,7 @@ import torch.nn as nn
 from torch.nn import functional as F
 from tqdm import tqdm
 # from NCE import *
+torch.backends.cudnn.enabled = False
 
 
 def init_weight(modules, activation):
@@ -66,8 +67,6 @@ class UnsupEmb(nn.Module):
         train_x_emb = self.embedding(train_x_batch)
         GRU_context = self.lstm(train_x_emb)[0]
         nce_out = self.nce(GRU_context, train_y_batch)
-        import pdb
-        pdb.set_trace()        
 
 
     def test_forward(test_x_batch, test_y_batch, test_batch_label):
@@ -138,7 +137,10 @@ class NCE_seq(NCE):
 
         noise_w = np.random.choice(np.arange(len(self.Pn)), size=(n_samples, n_steps, self.n_noise), p=self.Pn)
         next_w = next_w.flatten().reshape([n_samples, n_steps, 1])
-        next_w = np.concatenate([next_w, noise_w], axis=-1)
+        noise_w = torch.LongTensor(noise_w)
+        if self.is_cuda:
+            noise_w = noise_w.cuda()
+        next_w = torch.cat([next_w, noise_w], dim=-1)
 
         W_ = self.W[next_w.flatten()].flatten().view([n_samples, n_steps, n_next, self.input_dim])
         b_ = self.b[next_w.flatten()].view([n_samples, n_steps, n_next])
@@ -205,7 +207,7 @@ class NCETest_seq(NCETest):
 
 if __name__ == "__main__":
     arg = load_data.arg_passing(sys.argv)
-    CUDA=False
+    CUDA=True
     NB_EPOCHS=20
     BATCH_SIZE=50
     dataset = '../data/' + arg['-data'] + '_pretrain.pkl.gz'
