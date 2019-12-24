@@ -66,9 +66,9 @@ class UnsupEmb(nn.Module):
         train_x_emb = self.embedding(train_x_batch)
         GRU_context = self.lstm(train_x_emb)[0]
         nce_out = self.nce(GRU_context, train_y_batch)
-        
+        import pdb
+        pdb.set_trace()        
 
-        pass
 
     def test_forward(test_x_batch, test_y_batch, test_batch_label):
         pass
@@ -121,7 +121,7 @@ class NCE(nn.Module):
 
         out = s_theta - noise_score
 
-        return F.sigmoid(out)
+        return torch.sigmoid(out)
 
 
 class NCE_seq(NCE):
@@ -167,7 +167,7 @@ class NCETest(NCE):
             context = context.cuda()
 
         out = torch.matmul(context, self.W.t()) + self.b
-        out = F.softmax(out)
+        out = torch.softmax(out)
         next_w = next_w.flatten()
         return out[torch.LongTensor(np.arange(n_samples)), next_w]
 
@@ -194,7 +194,7 @@ class NCETest_seq(NCETest):
             context = context.cuda()
 
         out = torch.matmul(context, self.W.t()) + self.b
-        out = F.softmax(out)
+        out = torch.softmax(out)
         out = out.flatten().view([n_samples * n_steps, vocab_size])
         next_w = next_w.flatten()
 
