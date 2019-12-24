@@ -129,23 +129,27 @@ class NCE_seq(NCE):
         super(NCE_seq, self).__init__(**kwargs)
 
     def forward(self, GRU_context, next_inp):
-        context = GRU_context
-        next_w = next_inp
+        """
+        input is torch
+        """
+        context = GRU_context # torch
+        next_w = next_inp # torch
 
         n_samples, n_steps = next_w.shape
         n_next = self.n_noise + 1
 
         noise_w = np.random.choice(np.arange(len(self.Pn)), size=(n_samples, n_steps, self.n_noise), p=self.Pn)
-        next_w = next_w.flatten().reshape([n_samples, n_steps, 1])
         noise_w = torch.LongTensor(noise_w)
         if self.is_cuda:
             noise_w = noise_w.cuda()
+        
+        next_w = next_w.flatten().view([n_samples, n_steps, 1])
         next_w = torch.cat([next_w, noise_w], dim=-1)
 
         W_ = self.W[next_w.flatten()].flatten().view([n_samples, n_steps, n_next, self.input_dim])
         b_ = self.b[next_w.flatten()].view([n_samples, n_steps, n_next])
         s_theta = (context[:, :, None, :] * W_).sum(dim=-1) + b_
-        noiseP = self.Pn[next_w.flatten()].reshape([n_samples, n_steps, n_next])
+        noiseP = self.Pn[next_w.flatten().tolist()].reshape([n_samples, n_steps, n_next])
         noiseP = torch.FloatTensor(noiseP)
         if self.is_cuda:
             noiseP = noiseP.cuda()
@@ -255,6 +259,7 @@ if __name__ == "__main__":
 
     print("Fucking!!")
 
+    # NUMPY
     train_x_batch = train_x[:BATCH_SIZE]
     train_y_batch = train_y[:BATCH_SIZE]
     train_batch_label = labels[:BATCH_SIZE]
