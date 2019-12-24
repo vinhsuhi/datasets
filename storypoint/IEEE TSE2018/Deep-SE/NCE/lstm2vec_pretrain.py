@@ -41,7 +41,7 @@ class UnsupEmb(nn.Module):
         self.embedding = nn.Embedding(vocab_size, emb_dim)
         self.n_noise = n_noise
         self.Pn = Pn
-        self.cuda = cuda
+        self.is_cuda = cuda
         self.lstm = nn.LSTM(input_size=emb_dim, hidden_size=emb_dim, batch_first=True)
         self.nce = NCE_seq(input_dim=emb_dim, input_len=inp_len, vocab_size=vocab_size, n_noise=n_noise, Pn=Pn, cuda=cuda)
         self.nce_test = NCETest_seq(input_dim=emb_dim, input_len=inp_len, vocab_size=vocab_size, cuda=cuda)
@@ -66,14 +66,15 @@ class NCE(nn.Module):
         self.n_noise = n_noise
         self.Pn = Pn
         self.bias = bias
-        self.cuda = cuda
+        self.is_cuda = cuda
 
         # self.W = nn.Linear(self.vocab_size, self.input_dim, bias=True)
         self.W = nn.Parameter(torch.ones((self.vocab_size, self.input_dim)))
         if self.bias:
-            self.b = nn.Parameter(torch.ones((self.vocab_size)))
+            self.b = nn.Parameter(torch.zeros((self.vocab_size)))
 
-        init_weight(self.modules, None)
+        nn.init.xavier_uniform_(self.W.data)
+
 
 
     def forward(self, GRU_context, next_input, mask=None):
@@ -87,7 +88,7 @@ class NCE(nn.Module):
         next_w = np.concatenate([next_w, noise_w], axis=-1)
 
         next_w = torch.LongTensor(next_w)
-        if self.cuda:
+        if self.is_cuda:
             next_w = next_w.cuda()
 
         W_ = self.W[next_w.flatten()].flatten().view([n_samples, n_next, self.input_dim])
@@ -139,7 +140,7 @@ class NCETest(NCE):
 
         n_samples = next_w.shape[0]
         context = torch.FloatTensor(context)
-        if self.cuda:
+        if self.is_cuda:
             context = context.cuda()
 
         out = torch.matmul(context, self.W.t()) + self.b
@@ -166,7 +167,7 @@ class NCETest_seq(NCETest):
         vocab_size = self.W.shape[0]
 
         context = torch.Longtensor(context)
-        if self.cuda:
+        if self.is_cuda:
             context = context.cuda()
 
         out = torch.matmul(context, self.W.t()) + self.b
@@ -181,7 +182,7 @@ class NCETest_seq(NCETest):
 
 if __name__ == "__main__":
     arg = load_data.arg_passing(sys.argv)
-    CUDA=True
+    CUDA=False
     dataset = '../data/' + arg['-data'] + '_pretrain.pkl.gz'
     saving = arg['-saving']
     emb_dim = arg['-dim']
@@ -202,8 +203,6 @@ if __name__ == "__main__":
     train_x, train_y, train_mask = load_data.prepare_lm(train, vocab_size, max_len)
     valid_x, valid_y, valid_mask = load_data.prepare_lm(valid, vocab_size, max_len)
 
-    import pdb
-    pdb.set_trace()
 
     print('Data size: Train: %d, valid: %d' % (len(train_x), len(valid_x)))
 
@@ -220,11 +219,12 @@ if __name__ == "__main__":
     labels[:, :, 1] = 1
     
     model = UnsupEmb(emb_dim=emb_dim, vocab_size=vocab_size, \
-        inp_len=inp_len, n_noise=n_nosie, Pn=Pn, cuda=CUDA)
+        inp_len=inp_len, n_noise=n_noise, Pn=Pn, cuda=CUDA)
 
     if CUDA:
         model = model.cuda()
 
+    print("DONE!")
     
     
 
