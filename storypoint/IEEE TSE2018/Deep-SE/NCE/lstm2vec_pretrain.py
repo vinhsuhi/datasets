@@ -1,10 +1,5 @@
-# from keras.layers import *
-# from keras.models import Model
-# from keras.constraints import *
-# from keras.regularizers import *
 import gzip
 import numpy
-#import cPickle
 import sys
 import _pickle as cPickle
 import numpy as np
@@ -14,7 +9,6 @@ import noise_dist
 import torch.nn as nn
 from torch.nn import functional as F
 from tqdm import tqdm
-# from NCE import *
 torch.backends.cudnn.enabled = False
 
 
@@ -37,8 +31,8 @@ def init_weight(modules, activation):
 def NCE_seq_loss(y_true, y_pred):
     bceloss = nn.BCELoss()
     loss = bceloss(y_pred, y_true[:, :, 1:])
-    import pdb
-    pdb.set_trace()
+    lol = y_true[:, :, 0] * loss
+    return torch.sum(lol) / torch.sum(y_true[:, :, 0])
 
 
 class UnsupEmb(nn.Module):
@@ -260,15 +254,14 @@ if __name__ == "__main__":
     optimizer.zero_grad()
     train_x_batch = train_x[:BATCH_SIZE]
     train_y_batch = train_y[:BATCH_SIZE]
-    train_batch_label = labels[:BATCH_SIZE]
+    train_batch_label = torch.FloatTensor(labels[:BATCH_SIZE])
     if CUDA:
         train_batch_label = train_batch_label.cuda()
-    lol = model(train_x_batch, train_y_batch, train_batch_label)
+    lol = model(train_x_batch, train_y_batch)
     loss = NCE_seq_loss(train_batch_label, lol)
-    # for epoch in tqdm(range(NB_EPOCHS)):
-        # optimizer.zero_grad()
-
-        
+    print("loss: {:.4f}".format(loss.data))
+    loss.backward()
+    optimizer.step()
 
     print("DONE!")
 
