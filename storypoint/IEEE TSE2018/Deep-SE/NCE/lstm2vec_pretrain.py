@@ -55,19 +55,17 @@ class UnsupEmb(nn.Module):
         self.nce = NCE_seq(input_dim=emb_dim, input_len=inp_len, vocab_size=vocab_size, n_noise=n_noise, Pn=Pn, cuda=cuda)
         self.nce_test = NCETest_seq(input_dim=emb_dim, input_len=inp_len, vocab_size=vocab_size, cuda=cuda)
 
-    def forward(self, train_x_batch, train_y_batch, train_batch_label):
+    def forward(self, train_x_batch, train_y_batch):
         train_x_batch = torch.LongTensor(train_x_batch)
         train_y_batch = torch.LongTensor(train_y_batch)
-        train_batch_label = torch.LongTensor(train_batch_label)
         if self.is_cuda:
             train_x_batch = train_x_batch.cuda()
             train_y_batch = train_y_batch.cuda()
-            train_batch_label = train_batch_label.cuda()
 
         train_x_emb = self.embedding(train_x_batch)
         GRU_context = self.lstm(train_x_emb)[0]
         nce_out = self.nce(GRU_context, train_y_batch)
-
+        return nce_out
 
     def test_forward(test_x_batch, test_y_batch, test_batch_label):
         pass
@@ -259,11 +257,14 @@ if __name__ == "__main__":
 
 
     # NUMPY
+    optimizer.zero_grad()
     train_x_batch = train_x[:BATCH_SIZE]
     train_y_batch = train_y[:BATCH_SIZE]
     train_batch_label = labels[:BATCH_SIZE]
-
+    if CUDA:
+        train_batch_label = train_batch_label.cuda()
     lol = model(train_x_batch, train_y_batch, train_batch_label)
+    loss = NCE_seq_loss(train_batch_label, lol)
     # for epoch in tqdm(range(NB_EPOCHS)):
         # optimizer.zero_grad()
 
