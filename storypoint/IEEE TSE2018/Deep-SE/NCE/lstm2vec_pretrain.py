@@ -54,7 +54,7 @@ class UnsupEmb(nn.Module):
         self.nce = NCE_seq(input_dim=emb_dim, input_len=inp_len, vocab_size=vocab_size, n_noise=n_noise, Pn=Pn, cuda=cuda)
         self.nce_test = NCETest_seq(input_dim=emb_dim, input_len=inp_len, vocab_size=vocab_size, cuda=cuda)
 
-    def forward(train_x_batch, train_y_batch, train_batch_label):
+    def forward(self, train_x_batch, train_y_batch, train_batch_label):
         train_x_batch = torch.LongTensor(train_x_batch)
         train_y_batch = torch.LongTensor(train_y_batch)
         train_batch_label = torch.LongTensor(train_batch_label)
@@ -64,7 +64,7 @@ class UnsupEmb(nn.Module):
             train_batch_label = train_batch_label.cuda()
 
         train_x_emb = self.embedding(train_x_batch)
-        GRU_context = self.lstm(trainn_x_emb)
+        GRU_context = self.lstm(train_x_emb)
         nce_out = self.nce(GRU_context, train_y_batch)
         
 
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     if CUDA:
         model = model.cuda()
 
-    optimizer = torch.optim.Adam(model.params, lr=0.02)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.02)
 
     print("Fucking!!")
 
