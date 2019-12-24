@@ -64,7 +64,7 @@ class UnsupEmb(nn.Module):
             train_batch_label = train_batch_label.cuda()
 
         train_x_emb = self.embedding(train_x_batch)
-        GRU_context = self.lstm(train_x_emb)
+        GRU_context = self.lstm(train_x_emb)[0]
         nce_out = self.nce(GRU_context, train_y_batch)
         
 
@@ -136,15 +136,17 @@ class NCE_seq(NCE):
         n_samples, n_steps = next_w.shape
         n_next = self.n_noise + 1
 
-        noise_w = np.random.choice(np.arange(len(self.Pn)), size=(n_smaples, self.n_noise), p=self.Pn)
+        noise_w = np.random.choice(np.arange(len(self.Pn)), size=(n_samples, n_steps, self.n_noise), p=self.Pn)
         next_w = next_w.flatten().reshape([n_samples, n_steps, 1])
         next_w = np.concatenate([next_w, noise_w], axis=-1)
 
         W_ = self.W[next_w.flatten()].flatten().view([n_samples, n_steps, n_next, self.input_dim])
         b_ = self.b[next_w.flatten()].view([n_samples, n_steps, n_next])
-
-        s_theta = (context[:, :, None, :] * W_).sum(axis=-1) + b
+        s_theta = (context[:, :, None, :] * W_).sum(dim=-1) + b_
         noiseP = self.Pn[next_w.flatten()].reshape([n_samples, n_steps, n_next])
+        noiseP = torch.FloatTensor(noiseP)
+        if self.is_cuda:
+            noiseP = noiseP.cuda()
         noise_score = torch.log(self.n_noise * noiseP)
 
         out = s_theta - noise_score
