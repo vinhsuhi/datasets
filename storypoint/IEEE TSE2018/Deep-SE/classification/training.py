@@ -61,17 +61,11 @@ if 'fixed' in pretrain:
     train_t, train_d, valid_t, valid_d, test_t, test_d = prepare_data.to_features([train_t, train_d,
                                                                                    valid_t, valid_d,
                                                                                    test_t, test_d], emb_weight)
-    # n_classes, inp_len, emb_dim,
-    # seq_model='lstm', nnet_model='highway', pool_mode='mean',
-    # dropout_inp=False, dropout_hid=True):
 
     model = create_fixed(n_classes=n_classes, inp_len=train_t.shape[1], emb_dim=hid_dim,
                          seq_model=seq_model, nnet_model=nnet_model, pool_mode=pool,
                          dropout_inp=dropout_inp, dropout_hid=dropout_hid)
 else:
-    # n_classes, vocab_size, inp_len, emb_dim,
-    # seq_model='lstm', nnet_model='highway', pool_mode='mean',
-    # dropout_inp=False, dropout_hid=True
     model = create_model(n_classes=n_classes, vocab_size=vocab_size + 1, inp_len=train_t.shape[-1], emb_dim=hid_dim,
                          seq_model=seq_model, nnet_model=nnet_model, pool_mode=pool,
                          dropout_inp=dropout_inp, dropout_hid=dropout_hid, emb_weight=emb_weight)

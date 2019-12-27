@@ -15,6 +15,7 @@ torch.backends.cudnn.enabled = False
 
 
 def NCE_seq_loss(y_true, y_pred):
+    y_true = y_true.float()
     bceloss = nn.BCELoss()
     loss = bceloss(y_pred, y_true[:, :, 1:])
     lol = y_true[:, :, 0] * loss
@@ -36,12 +37,6 @@ class UnsupEmb(nn.Module):
         self.nce_test = NCETest_seq(input_dim=emb_dim, input_len=inp_len, vocab_size=vocab_size, cuda=cuda)
 
     def forward(self, train_x_batch, train_y_batch):
-        train_x_batch = torch.LongTensor(train_x_batch)
-        train_y_batch = torch.LongTensor(train_y_batch)
-        if self.is_cuda:
-            train_x_batch = train_x_batch.cuda()
-            train_y_batch = train_y_batch.cuda()
-
         train_x_emb = self.embedding(train_x_batch)
         GRU_context = self.lstm(train_x_emb)[0]
         nce_out = self.nce(GRU_context, train_y_batch)

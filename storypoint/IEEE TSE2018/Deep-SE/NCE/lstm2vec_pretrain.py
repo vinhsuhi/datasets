@@ -21,12 +21,12 @@ class MyDataset(Dataset):
         self.labels = labels
     
     def __len__(self):
-        return len(self.data)
+        return len(self.data_x)
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        if self.labels:
+        if self.labels is not None:
             return self.data_x[idx], self.data_y[idx], self.labels[idx]
         return self.data_x[idx], self.data_y[idx], None
 
@@ -55,6 +55,8 @@ if __name__ == "__main__":
     # prepare_lm load data and prepare input, output and then call the prepare_mask function
     # all word idx is added with 1, 0 is for masking -> vocabulary += 1
     train_x, train_y, train_mask = load_data.prepare_lm(train, vocab_size, max_len)
+    import pdb
+    pdb.set_trace()
     valid_x, valid_y, valid_mask = load_data.prepare_lm(valid, vocab_size, max_len)
 
     print('Data size: Train: %d, valid: %d' % (len(train_x), len(valid_x)))
@@ -84,6 +86,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.Adam(model.parameters(), lr=0.02)
 
     for epoch in tqdm(range(NB_EPOCHS)):
+        count = 0
         for local_batch_x, local_batch_y, local_labels in train_generator:
             local_batch_x = torch.LongTensor(local_batch_x)
             local_batch_y = torch.LongTensor(local_batch_y)
@@ -94,9 +97,13 @@ if __name__ == "__main__":
                 local_labels = local_labels.cuda()
             nce_out = model(local_batch_x, local_batch_y)
             loss = NCE_seq_loss(local_labels, nce_out)
-            print("loss: {:.4f}".format(loss.data))
+            if count % 50 == 0:
+                print("loss: {:.4f}".format(loss.data))
             loss.backward()
+            count += 1
             optimizer.step()
+
+    torch.save(model, "models/" + saving + ".pt") 
 
     print("DONE!")
 
